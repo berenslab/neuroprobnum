@@ -1,0 +1,66 @@
+# Explicit files:
+copyfile.ipynb
+
+# Compiled:
+*.com
+*.class
+*.py[cod]
+*.log
+*$py.class
+*.cache
+
+# Data:
+*.core
+*.pkl
+*.mat
+*.h5
+*.dat
+
+# Figures:
+*.pdf
+*.mp4
+*.png
+*.jpg
+*.bmp
+
+# Folders:
+__pycache__/
+__pypackages__/
+.ipynb_checkpoints
+*-logs
+_data
+_figures
+_backups
+
+# C++ Prerequisites:
+*.d
+
+# Compiled Object files:
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers:
+*.gch
+*.pch
+
+# Compiled Dynamic libraries:
+*.so
+*.dylib
+*.dll
+
+# Fortran module files:
+*.mod
+*.smod
+
+# Compiled Static libraries:
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables:
+*.exe
+*.out
+*.app
