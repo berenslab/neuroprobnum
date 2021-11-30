@@ -13,7 +13,7 @@ from inspect import signature
 from scipy.optimize import newton
 
 from .butcher_tableau import ButcherTableau
-from .solution import ode_solution, ode_solutions
+from .solution import ODESolution, ODESolutions
 
 TQDM_BARFORMAT = "{desc}: {percentage:3.0f}%|{bar}| t={n:.5f}/{total_fmt}=tmax [{elapsed}<{remaining}]"
 TQDM_BARFORMAT_PARA = "{desc}: {percentage:3.0f}%|{bar}| {n:.0f}/{total_fmt} samples [{elapsed}<{remaining}]"
@@ -311,7 +311,7 @@ class ProbSolver:
                 else:
                     solution = pool.map(self.solve_sample_unzip, zipped_params_list)
         # Postprocess solutions
-        solution = ode_solutions(solution, run_time=time() - start_time) if (n_samples > 1) else solution[0]
+        solution = ODESolutions(solution, run_time=time() - start_time) if (n_samples > 1) else solution[0]
 
         if not solution.success:
             print('Exited with error!')
@@ -363,7 +363,7 @@ class ProbSolver:
             save_step = True
             step_tmax = tmax
 
-        self.solution = ode_solution(
+        self.solution = ODESolution(
             adaptive=self.adaptive,
             t0=self.t0, y0=self.y0, ydot0=self.ydot0, h0=self.h0,
             tmax=tmax, return_vars=return_vars, n_events=self.n_events,
@@ -391,7 +391,8 @@ class ProbSolver:
                 pbar.update(self.t_new - self.t)
 
             if t_eval is not None:
-                if self.DEBUG: assert np.isclose(t_eval[i_t_eval], self.t_new) or self.t_new < t_eval[i_t_eval]
+                if self.DEBUG:
+                    assert np.isclose(t_eval[i_t_eval], self.t_new) or self.t_new < t_eval[i_t_eval]
                 save_step = np.abs(t_eval[i_t_eval] - self.t_new) < 1e-10  # allow rounding errors
                 # This does not influence the following integration as t_new is not modified.
                 if save_step:
@@ -406,7 +407,8 @@ class ProbSolver:
             elif i_eval is not None:
                 i_eval_count += 1
                 save_step = (i_eval_count == i_eval)
-                if save_step: i_eval_count = 0
+                if save_step:
+                    i_eval_count = 0
 
             self.solution.save_event(self.event_idxs, self.event_ts)
 
@@ -485,8 +487,7 @@ class ProbSolver:
             assert self.step_h > 0, self.step_h
 
         try:
-            self.t_new, self.y_new, self.ydot_new, self.error = \
-                self.step_impl(self.t, self.y, self.ydot, self.step_h)
+            self.t_new, self.y_new, self.ydot_new, self.error = self.step_impl(self.t, self.y, self.ydot, self.step_h)
         except KeyboardInterrupt:
             raise KeyboardInterrupt()
         except Exception as inst:
@@ -769,7 +770,8 @@ class ExplicitInt(ProbSolver):
         assert isinstance(self.ydot0, np.ndarray), self.ydot0
         self.K = np.full((tableau['n_stages'], self.n_y), np.nan, dtype=float)
         self.linear_dense_output = self.method not in ['HN', 'RKBS', 'RKDP']
-        if self.swapsols: self.compute_errors = True
+        if self.swapsols:
+            self.compute_errors = True
 
     def __repr__(self):
         return f'Explicit_ODE_solver({self.method})'
@@ -910,8 +912,10 @@ class ImplicitInt(ProbSolver):
     def step_impl(self, t, y, ydot, step_h):
         """Implicit euler step, can use explicit Euler as first guess"""
         t_new = t + step_h
+
         def rootfun(_y_new):
             return _y_new - (y + step_h * self.eval_odefun(t_new, _y_new))
+
         y_guess = y + step_h * ydot if ydot is not None else y
         y_new = newton(rootfun, y_guess, full_output=False, tol=step_h * 1e-3)
         return t_new, y_new, None, None

@@ -7,10 +7,8 @@ CRED = '\x1b[5;30;41m'
 CEND = '\x1b[0m'
 
 
-###########################################################################
-class ode_solution_base():
+class ODESolutionBase:
 
-    ###########################################################################
     def __init__(self, on_grid, on_regular_grid, n_samples):
         self.on_grid = on_grid
         self.on_regular_grid = on_regular_grid
@@ -38,13 +36,10 @@ class ode_solution_base():
         self.warn_list = []
         self.warn_count = {}
 
-    ###########################################################################
     def __repr__(self):
         return f'ODE_solution()'
 
-    ###########################################################################
-    def plot(self, plot_type='auto', max_nx_sb=4, max_ny_sb=3, figsize_xy=(12, 2),
-             y_names=None, y_units=None, t_unit=None, y_idxs=None,
+    def plot(self, plot_type='auto', max_nx_sb=4, max_ny_sb=3, y_names=None, y_units=None, t_unit=None, y_idxs=None,
              **kwargs):
         """Plot data. """
 
@@ -112,7 +107,6 @@ class ode_solution_base():
         plt.tight_layout()
         plt.show()
 
-    ###########################################################################
     @staticmethod
     def _plot_data(axs, ts, data, y_idxs):
         for data_i, ax in zip(data[:, y_idxs].T, axs):
@@ -125,31 +119,24 @@ class ode_solution_base():
         for nidx, elist in enumerate(events):
             axs[0].scatter(elist, np.full(len(elist), nidx), marker='.', zorder=0, color='darkgray', s=3)
 
-            ###########################################################################
-
     def show_warnings(self):
         for typ, count in self.warn_count.items():
             print(CRED + str(count) + ' times the following warning: ' + typ + CEND)
 
-    ###########################################################################
     def get_ts(self):
         return self.ts
 
-    ###########################################################################
     def get_ys(self):
         if not self.store_ys: return None
         return self.ys
 
-    ###########################################################################
     def get_ydots(self):
         if not self.store_ydots: return None
         return self.ydots
 
 
-###########################################################################
-class ode_solution(ode_solution_base):
+class ODESolution(ODESolutionBase):
 
-    ###########################################################################
     def __init__(self, adaptive, t0, y0, ydot0, h0, tmax, n_events,
                  return_vars, t_eval=None, i_eval=None, n_perturb=None):
 
@@ -189,11 +176,9 @@ class ode_solution(ode_solution_base):
 
         self.finalized = False
 
-    ###########################################################################
     def __repr__(self):
         return f'ODE_solution(ts={self.ts[0]}-{self.ts[-1]})'
 
-    ###########################################################################    
     def __init_adaptive(self, t0, y0, ydot0, t_eval):
         self.t_eval = t_eval
         self.ts = [t0]
@@ -207,7 +192,6 @@ class ode_solution(ode_solution_base):
         if self.store_failed_steps: self.steps_h = []
         if self.store_failed_steps: self.steps_success = []
 
-    ###########################################################################    
     def __init_fixed(self, t0, y0, ydot0, h0, tmax, i_eval):
         if i_eval is None: i_eval = 1
         nts = int(np.ceil((1 + np.ceil((tmax - t0) / (h0))) / i_eval))
@@ -236,7 +220,6 @@ class ode_solution(ode_solution_base):
             self.perturbations = np.full((nts, self.n_perturb), np.nan)
             self.perturbations[0, :] = 0.0
 
-    ###########################################################################
     def save_step(self, t=None, y=None, ydot=None, error=None,
                   perturbation=None, exit_on_nan=True):
         """Save current step."""
@@ -273,13 +256,11 @@ class ode_solution(ode_solution_base):
             for event_idx, event_t in zip(event_idxs, event_ts):
                 self.events[event_idx].append(event_t)
 
-    ###########################################################################
     def save_tried_step(self, h, success):
         """Save tried step size and success. """
         self.steps_h.append(h)
         self.steps_success.append(success)
 
-    ###########################################################################
     def get_t(self):
         """Get current time. """
         if self.adaptive:
@@ -287,12 +268,10 @@ class ode_solution(ode_solution_base):
         else:
             return self.ts[self.ti]
 
-    ###########################################################################
     def get_ts(self, sampleidx=None):
         assert sampleidx is None or (sampleidx == 0)
         return self.ts
 
-    ###########################################################################
     def get_ys(self, yidx=None, sampleidx=None):
         if not self.store_ys: return None
 
@@ -302,7 +281,6 @@ class ode_solution(ode_solution_base):
         else:
             return self.ys[:, yidx]
 
-    ###########################################################################
     def get_ydots(self, yidx=None, sampleidx=None):
         if not self.store_ydots: return None
 
@@ -315,7 +293,6 @@ class ode_solution(ode_solution_base):
             else:
                 return self.ydots[:, yidx]
 
-    ###########################################################################
     def finalize_data(self, interpolate=False, intpol_dt=None, intpol_kind=None):
         """Get solver data.
         interpolate (bool) : Interpolate date?
@@ -335,7 +312,6 @@ class ode_solution(ode_solution_base):
 
         self.finalized = True
 
-    ###########################################################################
     def __finalize_data_to_arrays(self):
         """Interpolate solver data.
         Returns:
@@ -357,7 +333,6 @@ class ode_solution(ode_solution_base):
 
         self.ts = np.asarray(self.ts)
 
-    ###########################################################################
     def __interpolated_arrays(self, intpol_dt, intpol_kind):
         """Interpolate solver data.
     
@@ -378,7 +353,8 @@ class ode_solution(ode_solution_base):
 
         # Get interpolation time.
         intpol_ts = np.arange(0, self.tmax, intpol_dt)
-        if intpol_ts[-1] < self.tmax: intpol_ts = np.append(intpol_ts, self.tmax)
+        if intpol_ts[-1] < self.tmax:
+            intpol_ts = np.append(intpol_ts, self.tmax)
 
         # Interpolate.
         if self.store_ys:
@@ -397,10 +373,8 @@ class ode_solution(ode_solution_base):
         self.on_regular_grid = True
 
 
-###########################################################################
-class ode_solutions(ode_solution_base):
+class ODESolutions(ODESolutionBase):
 
-    ###########################################################################
     def __init__(self, solutions, run_time=None):
         assert isinstance(solutions, list)
 
@@ -485,18 +459,15 @@ class ode_solutions(ode_solution_base):
             if self.store_errors:        self.errors = np.asarray(self.errors)
             if self.store_perturbations: self.perturbations = np.asarray(self.perturbations)
 
-    ###########################################################################
     def __repr__(self):
         return f'ODE_solutions(n_samples={self.n_samples})'
 
-    ###########################################################################
     def get_ts(self, sampleidx=None):
         if self.on_grid or sampleidx is None:
             return self.ts
         else:
             return self.ts[sampleidx]
 
-    ###########################################################################
     def get_ys(self, sampleidx=None, yidx=None):
         if not self.store_ys:
             return None
@@ -515,7 +486,6 @@ class ode_solutions(ode_solution_base):
             else:
                 return self.ys[sampleidx][:, yidx]
 
-    ###########################################################################
     def get_ydots(self, sampleidx=None, yidx=None):
 
         if not self.store_ydots: return None
@@ -540,7 +510,6 @@ class ode_solutions(ode_solution_base):
                 else:
                     return self.ydots[sampleidx][:, yidx]
 
-    ###########################################################################
     @staticmethod
     def _plot_data(axs, ts, data, y_idxs, summary_plot=False, max_samples=30):
 
