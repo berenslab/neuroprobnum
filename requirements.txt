@@ -1,0 +1,9 @@
+jax
+numpy
+pandas
+matplotlib
+scipy
+seaborn
+pickle5
+cython
+setuptools

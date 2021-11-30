@@ -1,7 +1,4 @@
-# Explicit files:
-copyfile.ipynb
-
-# Compiled:
+# Compiled
 *.com
 *.class
 *.py[cod]
@@ -9,58 +6,65 @@ copyfile.ipynb
 *$py.class
 *.cache
 
-# Data:
+# Data
 *.core
 *.pkl
 *.mat
 *.h5
 *.dat
 
-# Figures:
+# Figures, Note that some png will be commited.
 *.pdf
 *.mp4
-*.png
-*.jpg
-*.bmp
 
 # Folders:
+*.egg-info/
+NeuroProbNum.egg-info/
+build/
+data/
+_data/
+_figures/
 __pycache__/
 __pypackages__/
+.idea/
 .ipynb_checkpoints
 *-logs
-_data
-_figures
-_backups
 
-# C++ Prerequisites:
+
+# Compiled Cython
+*.c
+*.so
+*.o
+
+# C++
+# Prerequisites
 *.d
 
-# Compiled Object files:
+# Compiled files
 *.slo
 *.lo
 *.o
 *.obj
 
-# Precompiled Headers:
+# Precompiled Headers
 *.gch
 *.pch
 
-# Compiled Dynamic libraries:
-*.so
+# Compiled Dynamic libraries
 *.dylib
 *.dll
 
-# Fortran module files:
+# Fortran module files
 *.mod
 *.smod
 
-# Compiled Static libraries:
+# Compiled Static libraries
 *.lai
 *.la
 *.a
 *.lib
 
-# Executables:
+# Executables
 *.exe
 *.out
 *.app
