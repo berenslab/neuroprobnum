@@ -31,7 +31,7 @@ The probabilistic solvers were implemented based on the the work by [Conrad et a
 Contains all implemented models in python and Cython.
 
 The STG model was implemented based on [Prinz et al 2003](https://doi.org/10.1152/jn.00641.2003) and [Prinz et al 2004](https://doi.org/10.1038/nn1352).
-The Izhikevich neuron model was implmented based on [Izhikevich 2004](https://doi.org/10.1109/TNN.2004.832719).
+The Izhikevich neuron model was implemented based on [Izhikevich 2004](https://doi.org/10.1109/TNN.2004.832719).
 
 ### neuroprobnum/generator
 Contains python files to conveniently generate, save and load data for all the model with different solvers.
