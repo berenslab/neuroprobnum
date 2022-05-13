@@ -27,7 +27,7 @@ class DataLoader:
                         (df['step_param'] == step_param) &
                         (df['pert_method'] == pert_method) &
                         (df['pert_param'] == pert_param)
-                        ]
+                    ]
                     already_loaded = previous_data.shape[0] > 0
                 else:
                     already_loaded = False
@@ -93,6 +93,11 @@ class DataLoader:
         dd['n_samples'] = data.n_samples
         dd['run_times'] = data.run_times
         dd['nODEcalls'] = data.nODEcalls
+
+        try:
+            dd['seed'] = data.seed
+        except AttributeError:
+            dd['seed'] = None
 
         dd['ts'] = data.ts
 

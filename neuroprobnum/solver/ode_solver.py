@@ -34,7 +34,7 @@ class ProbSolver:
         """Initialize solver object.
 
         Parameters:
-        
+
         odefun : callable
             ordinary differential equation for initial value problem
         y0 : array
@@ -73,12 +73,13 @@ class ProbSolver:
             acceptstepfun : callable, optional
                 functions to check additional constraints on the acceptance of steps
                 besides the error. takes solver object as input argument.
-        
+
         Returns:
-        
+
         solver object
 
         """
+        self.raise_min_step_error = True
         self.DEBUG = False
         self.ignore_warnigns = False
 
@@ -220,11 +221,11 @@ class ProbSolver:
     def solve(
             self, tmax, seed=21315, n_samples=1, show_progress=True, show_warnings=True,
             interpolate=False, intpol_dt=None, intpol_kind='linear',
-            t_eval=None, i_eval=None, return_vars=('ys', ), n_parallel=30):
+            t_eval=None, i_eval=None, return_vars=('ys',), n_parallel=30):
         """Solves initial value problem (IVP).
 
         Parameters:
-        
+
         tmax : float
             time when solving the IVP is stopped.
         n_samples : int
@@ -248,7 +249,7 @@ class ProbSolver:
         i_eval : int >= 1 or None
             Only for fixed step size. Ever i_eval-th time points will be saved.
             E.g. set it to two, and every second evaluation will be saved.
-            
+
         return_vars : list of str
             Add the followings variables to track more data:
             'ys': save and return solution of state variables
@@ -259,9 +260,9 @@ class ProbSolver:
             'failed_steps' : if adaptive, save and return all steps performed
         n_parallel : int
             Maximum number of parallel processes.
-    
+
         Returns:
-        
+
         solution : solution object
 
         """
@@ -276,11 +277,11 @@ class ProbSolver:
         if interpolate:
             assert intpol_dt is not None
 
-        if isinstance(seed, int):
+        if isinstance(seed, (int, np.integer)):
             np.random.seed(seed)
             seeds = np.random.randint(0, np.iinfo(np.int32).max, n_samples)
         else:
-            assert np.asarray(seed).size == n_samples
+            assert np.asarray(seed).size == n_samples, type(seed)
             seeds = seed
 
         if isinstance(t_eval, float):
@@ -329,7 +330,8 @@ class ProbSolver:
             t_eval=None, i_eval=None, show_progress=False,
     ):
         """Compute single solution. Usually done in parallel for multiple samples."""
-        if seed is not None: np.random.seed(seed)
+        if seed is not None:
+            np.random.seed(seed)
 
         self.reset()
         start_time = time()
@@ -369,6 +371,7 @@ class ProbSolver:
             tmax=tmax, return_vars=return_vars, n_events=self.n_events,
             n_perturb=self.n_y if self.pert_method == 'conrad' else 1,
             t_eval=t_eval, i_eval=i_eval,
+            seed=seed,
         )
 
         while self.t < tmax:
@@ -550,7 +553,11 @@ class ProbSolver:
 
                 if try_step_success:
                     self.step_accepted = True
-                    if not self.error_accepted: self.warn('invalid error accepted', info=f"err_norm={err_norm:g}")
+                    if not self.error_accepted:
+                        if self.raise_min_step_error:
+                            raise ValueError('Reject min_step with invalid error norm')
+                        else:
+                            self.warn('invalid error accepted', info=f"err_norm={err_norm:g}")
                 else:
                     self.step_accepted = False
                     break

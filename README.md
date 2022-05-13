@@ -25,7 +25,7 @@ Make sure that the Hodgkin-Huxley Cython model is compiled without an error in t
 ### neuroprobnum/solver
 Contains the implemented probabilistic and deterministic solvers.
 
-The probabilistic solvers were implemented based on the the work by [Conrad et al. 2017](https://doi.org/10.1007/s11222-016-9671-0) and [Abdulle and Garegnani 2020](https://doi.org/10.1007/s11222-020-09926-w).
+The probabilistic solvers were implemented based on the work by [Conrad et al. 2017](https://doi.org/10.1007/s11222-016-9671-0) and [Abdulle and Garegnani 2020](https://doi.org/10.1007/s11222-020-09926-w).
 
 ### neuroprobnum/models
 Contains all implemented models in python and Cython.

@@ -25,6 +25,7 @@ class DataHolder:
         self.run_time = sol.run_time
         self.run_times = sol.run_times if self.n_samples > 1 else np.array([sol.run_time])
         self.nODEcalls = sol.nODEcalls
+        self.seed = sol.seed
 
         self.ts = sol.get_ts().copy()
 

@@ -114,7 +114,7 @@ class DataGenerator:
 
     def gen_sol(
             self, method, adaptive, step_param, pert_method,
-            pert_param=1.0, n_samples=None, plot=False
+            pert_param=1.0, n_samples=None, plot=False, seed=21315,
     ):
         """Generate samples."""
 
@@ -140,7 +140,8 @@ class DataGenerator:
         sol = solver.solve(
             tmax=self.tmax, n_samples=n_samples or self.n_samples,
             t_eval=t_eval, i_eval=i_eval, n_parallel=self.n_parallel,
-            show_progress=plot, return_vars=self.return_vars
+            show_progress=plot, return_vars=self.return_vars,
+            seed=seed,
         )
 
         if plot: self.plot_sol(sol)
@@ -167,14 +168,15 @@ class DataGenerator:
 
     def gen_data(
             self, method, adaptive, step_param, pert_method,
-            pert_param=1.0, n_samples=None, plot=False
+            pert_param=1.0, n_samples=None, plot=False, **kwargs,
     ):
         """Generate data for solver parameters."""
 
         sol = self.gen_sol(
             method, adaptive, step_param,
             pert_method=pert_method, pert_param=pert_param,
-            n_samples=n_samples or self.n_samples, plot=plot
+            n_samples=n_samples or self.n_samples, plot=plot,
+            **kwargs
         )
 
         acc_sol = self._get_acc_sol(t_eval=self.t_eval_adaptive if adaptive == 1 else sol.get_ts(), plot=plot)
@@ -370,13 +372,16 @@ class DataGenerator:
 
     def gen_and_save_data(
             self, method, adaptive, step_param, pert_method, pert_param=1.0,
-            stim=None, overwrite=False, allowgenerror=False, plot=False
+            stim=None, overwrite=False, allowgenerror=False, plot=False,
+            folder=None, filename=None, **kwargs
     ):
         """Generate data and save to file."""
 
-        folder, filename = self.get_data_folder_and_filename(
-            method, adaptive, step_param, pert_method, pert_param
-        )
+        if folder is None or filename is None:
+            assert folder is None and filename is None
+            folder, filename = self.get_data_folder_and_filename(
+                method, adaptive, step_param, pert_method, pert_param
+            )
         print('/'.join(filename.split('/')[2:]).rjust(60), end=' --> ')
         data_utils.make_dir(folder)
 
@@ -399,7 +404,8 @@ class DataGenerator:
             try:
                 data = self.gen_data(
                     method=method, adaptive=adaptive, step_param=step_param,
-                    pert_method=pert_method, pert_param=pert_param, plot=plot
+                    pert_method=pert_method, pert_param=pert_param, plot=plot,
+                    **kwargs
                 )
             except KeyboardInterrupt:
                 raise KeyboardInterrupt()

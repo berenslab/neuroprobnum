@@ -36,6 +36,8 @@ class ODESolutionBase:
         self.warn_list = []
         self.warn_count = {}
 
+        self.seed = None
+
     def __repr__(self):
         return f'ODE_solution()'
 
@@ -138,7 +140,7 @@ class ODESolutionBase:
 class ODESolution(ODESolutionBase):
 
     def __init__(self, adaptive, t0, y0, ydot0, h0, tmax, n_events,
-                 return_vars, t_eval=None, i_eval=None, n_perturb=None):
+                 return_vars, t_eval=None, i_eval=None, n_perturb=None, seed=None):
 
         super().__init__(on_grid=True, on_regular_grid=not adaptive, n_samples=1)
 
@@ -176,6 +178,8 @@ class ODESolution(ODESolutionBase):
 
         self.finalized = False
 
+        self.seed = seed
+
     def __repr__(self):
         return f'ODE_solution(ts={self.ts[0]}-{self.ts[-1]})'
 
@@ -194,7 +198,7 @@ class ODESolution(ODESolutionBase):
 
     def __init_fixed(self, t0, y0, ydot0, h0, tmax, i_eval):
         if i_eval is None: i_eval = 1
-        nts = int(np.ceil((1 + np.ceil((tmax - t0) / (h0))) / i_eval))
+        nts = int(np.ceil((1 + np.ceil((tmax - t0) / h0)) / i_eval))
 
         self.ti = 0
         self.ts = np.arange(nts, dtype=float) * (h0 * i_eval) + t0
@@ -207,7 +211,7 @@ class ODESolution(ODESolutionBase):
             if self.ydot_is_tuple:  # EE case
                 self.ydots = np.full((nts, 2, self.n_y), np.nan)
                 self.ydots[0, 0] = ydot0[0]
-                self.ydots[0, 1] = ydot0[0]
+                self.ydots[0, 1] = ydot0[1]
             else:
                 self.ydots = np.full((nts, self.n_y), np.nan)
                 self.ydots[0] = ydot0
@@ -335,20 +339,20 @@ class ODESolution(ODESolutionBase):
 
     def __interpolated_arrays(self, intpol_dt, intpol_kind):
         """Interpolate solver data.
-    
+
         Parameters:
-                
+
         intpol_dt : float
             time step of interpolation
-            
+
         intpol_kind : str
             type of interpolation, e.g. linear
-            
+
         Returns:
-     
+
         intpol_data : dict of arrays
             Dictionary containing interpolated data.
-            
+
         """
 
         # Get interpolation time.
@@ -414,6 +418,8 @@ class ODESolutions(ODESolutionBase):
 
         self.success_list = [sol.success for sol in solutions]
         self.success = np.all(self.success_list)
+
+        self.seed = [sol.seed for sol in solutions]
 
         if not self.success:
             print('Exited with error in {:.2f} samples.'.format(

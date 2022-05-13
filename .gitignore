@@ -15,6 +15,7 @@
 
 # Figures, Note that some png will be commited.
 *.pdf
+*.ai
 *.mp4
 
 # Folders:
@@ -43,7 +44,6 @@ __pypackages__/
 # Compiled files
 *.slo
 *.lo
-*.o
 *.obj
 
 # Precompiled Headers

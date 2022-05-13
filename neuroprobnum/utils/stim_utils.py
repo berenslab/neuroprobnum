@@ -70,14 +70,16 @@ class IStimStep(IStim):
 
 class IStimNoisy(IStimStep):
 
-    def __init__(self, Iamp, onset, offset, seed=42, nknots=31, name=None):
+    def __init__(self, Iamp, onset, offset, Irng=None, seed=42, nknots=31, name=None):
         """Smooth and noisy stimulus"""
         super().__init__(Iamp, onset, offset, name)
         self.seed = seed
         np.random.seed(seed)
 
+        self.Irng = Iamp if Irng is None else Irng
+
         t_knots = np.linspace(self.onset, self.offset, nknots)
-        I_knots = np.random.uniform(0.00, 2 * self.Iamp, t_knots.size)
+        I_knots = self.Iamp + np.random.uniform(-self.Irng, self.Irng, t_knots.size)
 
         I_knots[0] = 0.0
         I_knots[-1] = 0.0

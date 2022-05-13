@@ -98,7 +98,7 @@ def set_rcParams():
 set_rcParams()
 
 
-def savefig(filename, fig=None):
+def savefig(filename, fig=None, **kwargs):
     """Save figure to file"""
     assert "figures" not in filename
     assert ".pdf" not in filename
@@ -111,8 +111,8 @@ def savefig(filename, fig=None):
     if fig is None:
         fig = plt.gcf()
 
-    fig.savefig(f"figures/{filename}.pdf")  # save in folder
-    fig.savefig(f"../figures/{filename}.pdf")  # save in folder
+    fig.savefig(f"figures/{filename}.pdf", **kwargs)  # save in folder
+    fig.savefig(f"../figures/{filename}.pdf", **kwargs)  # save in folder
 
 
 def show_saved_figure(fig):
@@ -185,7 +185,7 @@ def auto_subplots(n_plots, max_nx_sb=4, max_ny_sb=20, xsize='text', ysizerow='au
 
 def iterate_axes(axs):
     """Make axes iterable, independent of type.
-    axs (list of matplotlib axes or matplotlib axis) : Axes to apply function to.    
+    axs (list of matplotlib axes or matplotlib axis) : Axes to apply function to.
     """
 
     if isinstance(axs, list):
@@ -236,10 +236,10 @@ def set_labs(axs, xlabs=None, ylabs=None, titles=None, panel_nums=None, panel_nu
              panel_num_pad=0, panel_num_y=None):
     """Set labels and titles for all given axes.
     Parameters:
-    
+
     axs : array or list of matplotlib axes.
         Axes to apply function to.
-        
+
     xlabs, ylabs, titles : str, list of str, or None
         Labels/Titles.
         If single str, will be same for all axes.
@@ -363,6 +363,15 @@ def text2mathtext(txt):
     return r"$\mathrm{" + txt + "}$"
 
 
+def metric2label(txt):
+    return {
+        'MAER_SM_SR': "R_S",
+        'MAER_DR_SR': "R_D",
+        'MAERP_SM_DR': "R_S R_D",
+        'MAERP_SM_DR_c': "R^c_S R^c_D",
+    }.get(txt, txt)
+
+
 def method2label(method, adaptive=None, step_param=None, pert_method=None, pert_param=None, time_unit='ms'):
     """Generate plot label for method."""
     label = method.replace('_', '')
@@ -415,8 +424,8 @@ def step_param2tick(step_param, adaptive):
     return label
 
 
-def pert_param2label(pert_param, pert_method):
-    label = f'{pert_method2symbol[pert_method]}={pert_param:.2g}'
+def pert_param2label(pert_param):
+    label = f'{pert_param_symbol}={pert_param:.2g}'
     return text2mathtext(label)
 
 
@@ -538,7 +547,9 @@ def make_share_xlims(axs, symmetric=False, xlim=None):
             xlim = (xlb, xub)
         else:
             xlim = (-np.max(np.abs([xlb, xub])), np.max(np.abs([xlb, xub])))
-    for ax in iterate_axes(axs): ax.set_xlim(xlim)
+
+    for ax in iterate_axes(axs):
+        ax.set_xlim(xlim, auto=False)
 
 
 def make_share_ylims(axs, symmetric=False, ylim=None):
@@ -551,7 +562,9 @@ def make_share_ylims(axs, symmetric=False, ylim=None):
             ylim = (ylb, yub)
         else:
             ylim = (-np.max(np.abs([ylb, yub])), np.max(np.abs([ylb, yub])))
-    for ax in iterate_axes(axs): ax.set_ylim(ylim)
+
+    for ax in iterate_axes(axs):
+        ax.set_ylim(ylim, auto=False)
 
 
 def get_bounds_and_fliers(arr, qs, n_nans_allowed):
@@ -610,30 +623,30 @@ def plot_percentiles(
         n_nans_allowed=0, nan_text=True, connect=True, connect_alpha=1.0,
 ):
     """ Make percentile plots.
-    
+
     ax : Matplotlib axis
         Axis to plot on.
-    
+
     positions : 1d-iterable or None
         x-positions of data
-        
+
     data : 2d-iterable
         Data to plot at positions.
         First dim should match dim of positions.
-        
+
     means : 1d-iterable or None
         Mean data to plot at positions.
         If means is set, will not plot the mean of data.
         First dim should match dim of positions.
-        
+
     color, marker : matplotlib color / marker
-    
+
     showflier : bool
         If True, will plot fliers.
-        
+
     qs : tuple of ints
         Lower and ubber percentile to plot.
-        
+
     """
 
     mean_kw = dict() if mean_kw is None else mean_kw
@@ -715,7 +728,6 @@ def plot_xy_percentiles(
         color='black', marker='o', showflier=False, qs=(10, 90),
         line_kw=None, mean_kw=None, outl_kw=None,
         n_nans_allowed=0, connect=True, connect_alpha=None):
-
     mean_kw = dict() if mean_kw is None else mean_kw
     line_kw = dict() if line_kw is None else line_kw
     outl_kw = dict() if outl_kw is None else outl_kw

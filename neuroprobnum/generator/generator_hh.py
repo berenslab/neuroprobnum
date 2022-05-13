@@ -40,6 +40,8 @@ class DataGeneratorHH(DataGenerator):
                 solver_params["poststepfun"] = self.poststep_estimate_spike
         elif self.clip_y:
             solver_params["poststepfun"] = self.poststep_clip_y
+        else:
+            solver_params.pop("poststepfun", None)
 
         return solver_params
 
@@ -106,3 +108,79 @@ class DataHolderHH(DataHolder):
     def __init__(self, model, **kwargs):
         super().__init__(model=model, **kwargs)
         self.Istim = np.array([model.get_Istim_at_t(t) for t in np.linspace(self.t0, self.tmax, 1001)])
+
+
+class DataGeneratorHHus(DataGeneratorHH):
+
+    def __init__(
+            self, return_vars=['ys'], vidx=0, n_parallel=20, h0=1, max_step=1e3, min_step=None,
+            acc_step_param=1e-12, acc_max_step=10, gen_det_sols=True, gen_acc_sols=True,
+            thresh=0.0, clip_y=False, **kwargs
+    ):
+        super().__init__(
+            return_vars=return_vars, vidx=vidx, n_parallel=n_parallel,
+            max_step=max_step, min_step=min_step, h0=h0,
+            acc_step_param=acc_step_param, acc_max_step=acc_max_step,
+            gen_det_sols=gen_det_sols, gen_acc_sols=gen_acc_sols,
+            thresh=thresh, clip_y=clip_y,
+            **kwargs
+        )
+
+    def get_solver_params(self, *args, **kwargs):
+        """Get ODE solver params"""
+        solver_params = super().get_solver_params(*args, **kwargs)
+
+        solver_params["odefun"] = None
+        solver_params["odefun_ydot"] = self.model.eval_ydot_us
+        solver_params["odefun_yinf_and_yf"] = self.model.eval_yinf_and_yf_us
+
+        return solver_params
+
+    def get_data_folder_and_filename(self, method, adaptive, step_param, pert_method, pert_param=1.0):
+        step_param = step_param * 1e-3 if not adaptive else step_param
+        return super().get_data_folder_and_filename(method=method, adaptive=adaptive, step_param=step_param,
+                                                    pert_method=pert_method, pert_param=pert_param)
+
+
+class DataGeneratorHHs(DataGeneratorHH):
+
+    def __init__(
+            self, return_vars=['ys'], vidx=0, n_parallel=20, h0=1e-6, max_step=1e-3, min_step=None,
+            acc_step_param=1e-12, acc_max_step=1e-5, gen_det_sols=True, gen_acc_sols=True,
+            thresh=0.0, clip_y=False, **kwargs
+    ):
+        super().__init__(
+            return_vars=return_vars, vidx=vidx, n_parallel=n_parallel,
+            max_step=max_step, min_step=min_step, h0=h0,
+            acc_step_param=acc_step_param, acc_max_step=acc_max_step,
+            gen_det_sols=gen_det_sols, gen_acc_sols=gen_acc_sols,
+            thresh=thresh, clip_y=clip_y,
+            **kwargs
+        )
+
+    def get_solver_params(self, *args, **kwargs):
+        """Get ODE solver params"""
+        solver_params = super().get_solver_params(*args, **kwargs)
+
+        solver_params["odefun"] = None
+        solver_params["odefun_ydot"] = self.model.eval_ydot_s
+        solver_params["odefun_yinf_and_yf"] = self.model.eval_yinf_and_yf_s
+
+        return solver_params
+
+    def get_data_folder_and_filename(self, method, adaptive, step_param, pert_method, pert_param=1.0):
+        step_param = step_param * 1e3 if not adaptive else step_param
+        return super().get_data_folder_and_filename(method=method, adaptive=adaptive, step_param=step_param,
+                                                    pert_method=pert_method, pert_param=pert_param)
+
+
+class DataGeneratorHHdoublespeed(DataGeneratorHH):
+    def get_solver_params(self, *args, **kwargs):
+        """Get ODE solver params"""
+        solver_params = super().get_solver_params(*args, **kwargs)
+
+        solver_params["odefun"] = None
+        solver_params["odefun_ydot"] = self.model.eval_ydot_doublespeed
+        solver_params["odefun_yinf_and_yf"] = self.model.eval_yinf_and_yf_doublespeed
+
+        return solver_params
