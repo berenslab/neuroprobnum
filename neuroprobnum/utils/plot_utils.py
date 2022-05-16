@@ -12,8 +12,9 @@ from ..solver import ode_solver
 
 # Color palette.
 DEFAULT_PALETTE = 'tab10'
+COL_WIDTH = 3.003346388891  # inch
 TEXT_WIDTH = 5.2  # inch
-FULLPAGE_WIDTH = 7.5  # inch
+FULLPAGE_WIDTH = 6.3228344444484  # inch
 FIGURE_HEIGHT = 1.2  # inch
 FIGURE_MAX_HEIGHT = 8.75  # inch
 
@@ -82,6 +83,7 @@ def set_rcParams():
     plt.rcParams['mathtext.sf'] = 'Arial'
     plt.rcParams['mathtext.tt'] = 'Arial'
 
+    #plt.rcParams['pdf.fonttype'] = 42  # Embed fonts
     plt.rcParams['figure.dpi'] = 120  # only affects the notebook
     plt.rcParams['figure.facecolor'] = (1, 1, 1, 1)  # only affects the notebook
 
@@ -137,16 +139,18 @@ def tight_layout(h_pad=1, w_pad=1, rect=(0, 0, 1, 1), pad=None):
     plt.tight_layout(h_pad=h_pad, w_pad=w_pad, pad=pad or 2. / plt.rcParams['font.size'], rect=rect)
 
 
-def subplots(nx_sb=4, ny_sb=1, xsize='text', ysize='auto', ysizerow='auto', yoffsize=0.0, **kwargs):
+def subplots(nx_sb=4, ny_sb=1, xsize='fullwidth', ysize='auto', ysizerow='auto', yoffsize=0.0, **kwargs):
     """Like plt.subplots, but with auto size."""
 
     # Get auto fig size.
     if xsize == 'text':
         xsize = TEXT_WIDTH
+    elif xsize == 'col':
+        xsize = COL_WIDTH
     elif xsize == 'fullwidth':
         xsize = FULLPAGE_WIDTH
     else:
-        assert isinstance(xsize, (float, int)), "x not in {'text', 'fullwidth', float}"
+        assert isinstance(xsize, (float, int)), f"{xsize} not in {'text', 'col', 'fullwidth', float}"
 
     if ysize == 'auto':
         if ysizerow == 'auto':
